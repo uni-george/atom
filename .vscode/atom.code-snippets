@@ -1,0 +1,19 @@
+{
+    "Create new route": {
+		"prefix": "route",
+		"body": [
+			"'use strict';",
+			"",
+			"module.exports = {",
+			"    path: \"${1:/}\",",
+			"    priority: ${2:0},",
+			"    methods: {",
+			"        get: (req, res, next) => {",
+			"            $0",
+			"        }",
+			"    }",
+			"}"
+		],
+		"description": ""
+	},
+}
