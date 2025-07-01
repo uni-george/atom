@@ -5,6 +5,7 @@ module.exports = {
     priority: 0,
     methods: {
         get: (req, res, next) => {
+            res.status(404);
             return res.json({
                 name: "a user"
             });

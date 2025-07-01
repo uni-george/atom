@@ -71,8 +71,8 @@ class ServerManager {
             }
         }
 
-        ServerManager.#loadRoutes();
         ServerManager.#loadStatics();
+        ServerManager.#loadRoutes();
     }
 
     static #loadRoutes(routeDir, router) {
@@ -179,7 +179,7 @@ class ServerManager {
         let nextRoute = routes.shift();
         for (const method of nextRoute.validMethods) {
             debug(`Loading method ${method} for ${nextRoute.filename}`);
-            if (typeof nextRoute.methods[method] != "function") {
+            if (typeof nextRoute.methods[method] != "function" && typeof nextRoute.methods[method] != "object") {
                 debug(`Skipping method ${method} as it is not a function.`);
                 continue;
             }

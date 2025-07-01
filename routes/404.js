@@ -1,11 +1,13 @@
 'use strict';
 
+const { ResourceNotFound } = require("../util/standardResponses");
+
 module.exports = {
-    path: "/",
-    priority: 10,
+    path: "*all",
+    priority: -100,
     methods: {
         get: (req, res, next) => {
-            res.send("hi thereeee");
+            return ResourceNotFound(res);
         }
     }
 }

@@ -1,0 +1,9 @@
+@layer atom {
+    html, body, #root {
+        min-height: 100vh;
+    }
+
+    code, pre {
+        font-family: 'IBM Plex Mono', monospace !important;
+    }
+}
