@@ -18,15 +18,22 @@ DatabaseManagers.DataDBManager.setDefinitions([
 
     // scheme specific
     "localLogins (userID TEXT UNIQUE, username TEXT, passwordHash TEXT, PRIMARY KEY(username))",
-    "googleLogins (userID TEXT, googleID TEXT, PRIMARY KEY(googleID))",
+    "googleLogins (userID TEXT, googleID TEXT, accountEmail TEXT, PRIMARY KEY(googleID))",
 
     // user groups
-    "groups (id TEXT, name TEXT, colour TEXT, PRIMARY KEY(id))",
+    "groups (id TEXT, name TEXT, parentID TEXT, colour TEXT, PRIMARY KEY(id))",
 
     // permissions
-    "userPermissions (userID TEXT, permission TEXT, PRIMARY KEY(userID, permission))",
-    "groupPermissions (groupID TEXT, permission TEXT, PRIMARY KEY(groupID, permission))"
+    "userGlobalPermissions (userID TEXT, permission TEXT, PRIMARY KEY(userID, permission))",
+    "groupGlobalPermissions (groupID TEXT, permission TEXT, PRIMARY KEY(groupID, permission))",
+
+    // images
+    "images (id TEXT, isExternal INTEGER DEFAULT 1, source TEXT, PRIMARY KEY(id))"
 ]).init(join(__dirname, "databases", "data.sqlite"));
+
+DatabaseManagers.FileDBManager.setDefinitions([
+    "files (id TEXT, name TEXT, mime TEXT, size INTEGER, added INTEGER, addedBy TEXT, data BLOB, PRIMARY KEY(id))"
+]).init(join(__dirname, "databases", "files.sqlite"));
 
 //#endregion
 
@@ -91,19 +98,21 @@ ServerManager.setupFromState();
 
 // ----- errors -----
 // 500
+const AtomError = require("./util/AtomError");
 ServerManager.app.use((err, req, res, next) => {
     if (res.headersSent) {
         return next(err);
     }
 
-    require("./util/standardResponses").ServerError(res);
+    require("./util/standardResponses").ServerError(res, err instanceof AtomError ? err.message : undefined);
     critical(err);
 });
 
 
 // expose to console interface
 const UserManager = require("./managers/data/UserManager");
-const LocalAuthManager = require("./managers/auth/LocalAuthManager");
+const AuthManager = require("./managers/auth/AuthManager");
+// const LocalAuthManager = require("./managers/auth/LocalAuthManager");
 
 // console interface for debugging if debug mode is on
 // disabled when debug is off

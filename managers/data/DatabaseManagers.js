@@ -1,5 +1,7 @@
 'use strict';
 
+const AtomError = require("../../util/AtomError");
+
 class DatabaseManager {
     /**
      * True/false depending on whether the database manager is ready to be used.
@@ -42,7 +44,7 @@ class DatabaseManager {
      * @returns {DatabaseManager} This DatabaseManager.
      */
     init(path) {
-        if (!path) throw new Error("no database path provided");
+        if (!path) throw new AtomError("no database path provided");
 
         this.#path = path;
         this.#ready = true;
@@ -68,7 +70,7 @@ class DatabaseManager {
      * @returns {any} The result of the function.
      */
     operation(f) {
-        if (!this.#ready) throw new Error("this database manager has not been initialised");
+        if (!this.#ready) throw new AtomError("this database manager has not been initialised");
         // load db
         let db = require("better-sqlite3")(this.#path);
         let output;
@@ -81,12 +83,20 @@ class DatabaseManager {
         db.close();
         return output;
     }
+
+    /**
+     * Get the path of the DB this DatabaseManager manages.
+     * @returns {string=} The path the DB is stored at.
+     */
+    getPath() {
+        return this.#path;
+    }
 }
 
 class DatabaseManagers {
     static DataDBManager = new DatabaseManager();
-    static UserGroupDBManager = new DatabaseManager();
-    static PermissionDBManager = new DatabaseManager();
+    
+    static FileDBManager = new DatabaseManager();
 }
 
 module.exports = DatabaseManagers;

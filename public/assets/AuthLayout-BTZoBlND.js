@@ -1,1 +1,0 @@
-import{w as o,o as t,O as r}from"./chunk-QMGIS6GS-u2c-GNVz.js";import{a as s}from"./AuthPageStyle-B4-unkLC.js";import"./createSvgIcon-CCROtrPb.js";import"./Box-DIqf7J0d.js";import"./index-B3mRFlF4.js";const n=o(function(){return t.jsx(s,{children:t.jsx(r,{})})});export{n as default};

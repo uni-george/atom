@@ -1,0 +1,6 @@
+{
+    "search.exclude": {
+        "/client": true,
+        "/public/assets/**/*.js": true
+    }
+}

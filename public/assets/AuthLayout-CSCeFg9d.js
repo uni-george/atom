@@ -1,0 +1,1 @@
+import{w as o,o as t,O as r}from"./chunk-QMGIS6GS-Cu-6P6Bw.js";import{A as i}from"./AuthPageStyle-DvtMN3mr.js";import"./AtomLogo-D5L938-d.js";import"./Stack-DhFApu8q.js";import"./Box-2c1FOgfs.js";import"./createSvgIcon-DY0Mft1u.js";import"./index-B-zvUale.js";const x=o(function(){return t.jsx(i,{children:t.jsx(r,{})})});export{x as default};

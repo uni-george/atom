@@ -3,6 +3,7 @@
 const dbManager = require("../data/DatabaseManagers").DataDBManager;
 const hash = require("../../util/hash");
 const compareHash = require("../../util/compareHash");
+const AtomError = require("../../util/AtomError");
 
 class LocalAuthManager {
     /**
@@ -47,12 +48,12 @@ class LocalAuthManager {
      * @returns {LocalAuthDetails} The resulting LocalAuthDetails.
      */
     static createForUser(userID, username, password) {
-        if (!userID) throw new Error("Cannot create a local login without a user ID.");
-        if (!username) throw new Error("Cannot create a local login without a username.");
-        if (!password) throw new Error("Cannot create a local login without a password.");
+        if (!userID) throw new AtomError("Cannot create a local login without a user ID.");
+        if (!username) throw new AtomError("Cannot create a local login without a username.");
+        if (!password) throw new AtomError("Cannot create a local login without a password.");
 
         if (LocalAuthManager.get(userID)) {
-            throw new Error("Cannot create a local login for a user that already has a local login.");
+            throw new AtomError("Cannot create a local login for a user that already has a local login.");
         }
 
         let details = new LocalAuthDetails();
@@ -96,9 +97,9 @@ class LocalAuthDetails {
      * @returns {LocalAuthDetails} This set of LocalAuthDetails.
      */
     save() {
-        if (!this.userID) throw new Error("Cannot save LocalAuthDetails without a user ID.");
-        if (!this.username) throw new Error("Cannot save LocalAuthDetails without a username.");
-        if (!this.passwordHash) throw new Error("Cannot save LocalAuthDetails without a password hash.");
+        if (!this.userID) throw new AtomError("Cannot save LocalAuthDetails without a user ID.");
+        if (!this.username) throw new AtomError("Cannot save LocalAuthDetails without a username.");
+        if (!this.passwordHash) throw new AtomError("Cannot save LocalAuthDetails without a password hash.");
 
         dbManager.operation(db=> {
             db.prepare("REPLACE INTO localLogins (userID, username, passwordHash) VALUES (?, ?, ?)").run(this.userID, this.username, this.passwordHash);
@@ -113,7 +114,7 @@ class LocalAuthDetails {
      * @returns {boolean} True/false depending on whether the password was a match.
      */
     checkPassword(password) {
-        if (!this.passwordHash) throw new Error("Cannot check against empty password hash.");
+        if (!this.passwordHash) throw new AtomError("Cannot check against empty password hash.");
 
         return compareHash(password, this.passwordHash);
     }

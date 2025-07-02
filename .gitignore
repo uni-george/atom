@@ -5,3 +5,4 @@ logs/
 config/
 
 .env
+*:Zone.Identifier

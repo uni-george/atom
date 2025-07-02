@@ -156,6 +156,17 @@ class UserSession {
 
         return this;
     }
+
+    /**
+     * Delete this session.
+     */
+    delete() {
+        if (!this.id) throw new Error("Cannot end session without an ID.");
+        dbManager.operation(db => {
+            db.prepare("DELETE FROM sessions WHERE id = ?").run(this.id);
+        });
+        delete this;
+    }
 }
 
 module.exports = UserManager;

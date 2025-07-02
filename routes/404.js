@@ -6,7 +6,7 @@ module.exports = {
     path: "*all",
     priority: -100,
     methods: {
-        get: (req, res, next) => {
+        all: (req, res, next) => {
             return ResourceNotFound(res);
         }
     }
