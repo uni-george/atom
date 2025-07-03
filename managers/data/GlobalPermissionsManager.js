@@ -12,7 +12,9 @@ const dbManager = require("./DatabaseManagers").DataDBManager;
 const GlobalPermissions = {
     AccessDashboard: "ACCESS_DASHBOARD",
     UploadFiles: "UPLOAD_FILES",
-    DownloadFiles: "DOWNLOAD_FILES"
+    DownloadFiles: "DOWNLOAD_FILES",
+    // only used whe requiresAuthentication in /config/api/docs.json is set to true
+    ViewAPIDocs: "VIEW_API_DOCS"
 }
 
 class GlobalPermissionsManager {

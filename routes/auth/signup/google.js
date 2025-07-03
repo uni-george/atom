@@ -1,12 +1,15 @@
 'use strict';
 
 const passport = require("passport");
+const AuthManager = require("../../../managers/auth/AuthManager");
 
 module.exports = {
     path: "/google",
     priority: 1,
     methods: {
         get: (req, res, next) => {
+            if (!AuthManager.getEnabledSignupMethods().includes("google")) return next();
+
             const attemptType = "register";
             const state = Buffer.from(JSON.stringify({
                 attemptType,

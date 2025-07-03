@@ -2,7 +2,8 @@
 
 const passport = require("passport");
 const AtomError = require("../../../util/AtomError");
-const { ActionSuccessful } = require("../../../util/standardResponses");
+const { ActionSuccessful, ResourceNotFound } = require("../../../util/standardResponses");
+const AuthManager = require("../../../managers/auth/AuthManager");
 
 module.exports = {
     path: "/local",
@@ -11,6 +12,8 @@ module.exports = {
         post: [
             /** @type {import("express").Handler} */
             (req, res, next) => {
+                if (!AuthManager.getEnabledLoginMethods().includes("local")) return ResourceNotFound(res);
+
                 const attemptType = "login";
                 const state = Buffer.from(JSON.stringify({ 
                     attemptType,

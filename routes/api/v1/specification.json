@@ -1,0 +1,273 @@
+{
+    "openapi": "3.0.4",
+    "info": {
+        "title": "atom",
+        "description": "API primarily for providing functionality for base atom.",
+        "version": "v1"
+    },
+    "servers": [
+        {
+            "url": "http://atom.unigeorge.uk:3000/api/v1",
+            "description": "Development server"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "Cookie": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "session"
+            }
+        },
+        "schemas": {
+            "Error": {
+                "type": "object",
+                "required": [
+                    "code"
+                ],
+                "properties": {
+                    "code": {
+                        "type": "integer",
+                        "description": "The HTTP error code."
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "A short message explaining the reason behind the error."
+                    }
+                },
+                "example": {
+                    "code": 404,
+                    "message": "The requested resource could not be found on the server."
+                }
+            },
+            "User": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "properties": {
+                    "id": {
+                        "$ref": "#/components/schemas/Snowflake"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The user's display name."
+                    }
+                }
+            },
+            "Snowflake": {
+                "type": "string",
+                "example": "0123456789876543210",
+                "description": "A Snowflake ID.",
+                "externalDocs": {
+                    "url": "https://en.wikipedia.org/wiki/Snowflake_ID"
+                }
+            },
+            "AuthenticationMethod": {
+                "type": "string",
+                "enum": [
+                    "local",
+                    "google"
+                ]
+            }
+        },
+        "responses": {
+            "MalformedRequestError": {
+                "description": "The server could understand the user's request/the user's request was invalid.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 400,
+                            "message": "Invalid parameters/request body."
+                        }
+                    }
+                }
+            },
+            "UserNotAuthenticatedError": {
+                "description": "The user is not logged in/using a valid API key.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 401,
+                            "message": "The user is not logged in/using a valid API key."
+                        }
+                    }
+                }
+            },
+            "UserNotAuthorisedError": {
+                "description": "The user is not authorised to carry out the intended action.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 403,
+                            "message": "You are not authorised to carry out this action."
+                        }
+                    }
+                }
+            },
+            "ResourceNotFoundError": {
+                "description": "The requested resource could not be found on the server.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        },
+                        "example": {
+                            "code": 404,
+                            "message": "The requested resource could not be found on the server."
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "user",
+            "description": "User-related endpoints."
+        },
+        {
+            "name": "auth",
+            "description": "Authentication-related endpoints."
+        },
+        {
+            "name": "test"
+        }
+    ],
+    "paths": {
+        "/test": {
+            "get": {
+                "summary": "Check API is online.",
+                "description": "Check the API is online and working.",
+                "tags": [
+                    "test"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Some sample data.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "object",
+                                            "properties": {
+                                                "text": {
+                                                    "type": "string",
+                                                    "description": "A randomised piece of text.",
+                                                    "example": "yet another CMS"
+                                                },
+                                                "fixed": {
+                                                    "type": "string",
+                                                    "description": "A piece of text.",
+                                                    "example": "this is some text"
+                                                }
+                                            }
+                                        },
+                                        "uptime": {
+                                            "type": "number",
+                                            "description": "The server's uptime in ms."
+                                        },
+                                        "readableUptime": {
+                                            "type": "string",
+                                            "description": "A readable version of the server's uptime.",
+                                            "example": "2 days 3 hours 2 secs"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/methods/login": {
+            "get": {
+                "summary": "Get login methods.",
+                "description": "Get a list of the authentication methods currently available to use to log in.",
+                "tags": [
+                    "auth"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested authentication methods.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AuthenticationMethod"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/methods/signup": {
+            "get": {
+                "summary": "Get signup methods.",
+                "description": "Get a list of the authentication methods currently available to use to sign up.",
+                "tags": [
+                    "auth"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested authentication methods.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AuthenticationMethod"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/me": {
+            "get": {
+                "summary": "Get the current user.",
+                "description": "Get details about the user currently using the API.",
+                "tags": [
+                    "user"
+                ],
+                "security": [
+                    {
+                        "Cookie": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested details regarding the user currently accessing the API.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UserNotAuthenticatedError"
+                    }
+                }
+            }
+        }
+    }
+}

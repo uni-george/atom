@@ -94,6 +94,22 @@ ServerManager.app.use("/api", (err, req, res, next) => {
     else return next();
 });
 
+// api docs
+if (require("./config/api/docs.json")) {
+    const swaggerUI = require("swagger-ui-express");
+    [
+        "v1"
+    ].forEach(x => {
+        try {
+            const document = require(`./routes/api/${x}/specification.json`);
+            
+            ServerManager.app.use(`/api/${x}/docs`, swaggerUI.serve, swaggerUI.setup(document));
+        } catch (e) {
+            warn(`Couldn't load API specification for version ${x}:\n${e}`)
+        }
+    })
+}
+
 ServerManager.setupFromState();
 
 // ----- errors -----
@@ -112,6 +128,7 @@ ServerManager.app.use((err, req, res, next) => {
 // expose to console interface
 const UserManager = require("./managers/data/UserManager");
 const AuthManager = require("./managers/auth/AuthManager");
+const { warn } = require("console");
 // const LocalAuthManager = require("./managers/auth/LocalAuthManager");
 
 // console interface for debugging if debug mode is on
