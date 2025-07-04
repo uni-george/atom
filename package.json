@@ -16,6 +16,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.0.0",
     "express": "^5.1.0",
+    "express-validator": "^7.2.1",
     "node-device-detector": "^2.2.2",
     "nodemon": "^3.1.10",
     "passport": "^0.7.0",

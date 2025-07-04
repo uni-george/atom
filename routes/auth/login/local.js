@@ -4,12 +4,15 @@ const passport = require("passport");
 const AtomError = require("../../../util/AtomError");
 const { ActionSuccessful, ResourceNotFound } = require("../../../util/standardResponses");
 const AuthManager = require("../../../managers/auth/AuthManager");
+const isNotAuthenticated = require("../../../uses/isNotAuthenticated");
+const addSessionDeviceInfo = require("../../../uses/addSessionDeviceInfo");
 
 module.exports = {
     path: "/local",
     priority: 0,
     methods: {
         post: [
+            isNotAuthenticated,
             /** @type {import("express").Handler} */
             (req, res, next) => {
                 if (!AuthManager.getEnabledLoginMethods().includes("local")) return ResourceNotFound(res);
@@ -29,6 +32,7 @@ module.exports = {
                     state: state
                 })(req, res, next);
             },
+            addSessionDeviceInfo,
             /** @type {import("express").Handler} */
             (req, res, next) => {
                 ActionSuccessful(res);

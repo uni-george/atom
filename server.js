@@ -121,7 +121,7 @@ ServerManager.app.use((err, req, res, next) => {
     }
 
     require("./util/standardResponses").ServerError(res, err instanceof AtomError ? err.message : undefined);
-    critical(err);
+    (err instanceof AtomError ? warn : critical)(err);
 });
 
 

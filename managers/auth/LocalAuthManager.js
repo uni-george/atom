@@ -6,6 +6,9 @@ const compareHash = require("../../util/compareHash");
 const AtomError = require("../../util/AtomError");
 
 class LocalAuthManager {
+    static usernamePattern = /^[a-zA-Z0-9._-]{3,16}$/;
+    static passwordPattern = /^[a-zA-Z0-9\._+\-/\\*=!"£$%^&*()\[\]{}:;@#~&<>? ]{12,255}$/;
+    
     /**
      * Get a user's LocalAuthDetails.
      * @param {string} userID The user's ID.
@@ -54,6 +57,10 @@ class LocalAuthManager {
 
         if (LocalAuthManager.get(userID)) {
             throw new AtomError("Cannot create a local login for a user that already has a local login.");
+        }
+
+        if (LocalAuthManager.getForUsername(username)) {
+            throw new AtomError("Requested username is already in use.", "ERR_USERNAME_NOT_AVAILABLE");
         }
 
         let details = new LocalAuthDetails();

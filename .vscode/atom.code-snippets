@@ -8,8 +8,8 @@
 			"    path: \"${1:/}\",",
 			"    priority: ${2:0},",
 			"    methods: {",
+			"        /** @type {import(\"express\").Handler[]} */",
 			"        get: [",
-			"            /** @type {import(\"express\").Handler} */",
 			"            (req, res, next) => {",
 			"                $0",
 			"            }",
@@ -19,4 +19,17 @@
 		],
 		"description": ""
 	},
+	"Create new middleware": {
+		"prefix": "middleware",
+		"body": [
+			"'use strict';",
+			"",
+			"/** @type {import(\"express\").Handler} */",
+			"const ${TM_FILENAME_BASE} = (req, res, next) => {",
+			"    $0",
+			"}",
+			"",
+			"module.exports = ${TM_FILENAME_BASE};"
+		]
+	}
 }

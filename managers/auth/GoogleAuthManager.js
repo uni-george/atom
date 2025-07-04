@@ -95,7 +95,7 @@ class GoogleAuthDetails {
         if (!this.googleID) throw new AtomError("Cannot save GoogleAuthDetails without a Google ID.");
 
         dbManager.operation(db => {
-            db.prepare("REPLACE INTO googleLogins (userID, googleID, accountEmail) VALUES (?, ?, ?)").run(this.userID, this.googleID, this,this.accountEmail);
+            db.prepare("REPLACE INTO googleLogins (userID, googleID, accountEmail) VALUES (?, ?, ?)").run(this.userID, this.googleID, this.accountEmail);
         });
 
         return this;

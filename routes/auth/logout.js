@@ -1,12 +1,14 @@
 'use strict';
 
+const isAuthenticated = require("../../uses/isAuthenticated");
 const { ResourceNotFound, ActionSuccessful, MalformedRequest, ServerError } = require("../../util/standardResponses");
 
 module.exports = {
     path: "/logout",
     priority: 0,
     methods: {
-        get: [
+        post: [
+            isAuthenticated,
             /** @type {import("express").Handler} */
             (req, res, next) => {
                 if (!req.user) {

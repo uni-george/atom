@@ -2,6 +2,7 @@
 
 const tokenGenerate = require("../../util/tokenGenerate");
 const hash = require("../../util/hash");
+const compareHash = require("../../util/compareHash");
 
 const SnowflakeID = require("snowflake-id").default;
 const snowflake = new SnowflakeID();
@@ -26,7 +27,7 @@ class UserManager {
      * @returns {User} A new user.
      */
     static create() {
-        return new User
+        return new User();
     }
 }
 
@@ -123,12 +124,40 @@ class User {
 
 class UserSession {
     constructor() {
+        /**
+         * This session's ID.
+         * @type {string=}
+         */
         this.id = undefined;
+        /**
+         * This session's user.
+         * @type {string=}
+         */
         this.userID = undefined;
+        /**
+         * The time this session was created.
+         * @type {Date=}
+         */
         this.created = undefined;
+        /**
+         * The time this session expires.
+         * @type {Date=}
+         */
         this.expires = undefined;
+        /**
+         * The IP of the device this session was started from.
+         * @type {string=}
+         */
         this.originIP = undefined;
+        /**
+         * A description of the device this session was started from.
+         * @type {string=}
+         */
         this.device = undefined;
+        /**
+         * A description of the client this session was started from.
+         * @type {string=}
+         */
         this.browser = undefined;
     }
 
@@ -166,6 +195,20 @@ class UserSession {
             db.prepare("DELETE FROM sessions WHERE id = ?").run(this.id);
         });
         delete this;
+    }
+
+    /**
+     * Save this UserSession.
+     * @returns {UserSession} This UserSession.
+     */
+    save() {
+        if (!this.id) throw new Error("Cannot save session without an ID.");
+        dbManager.operation(db => {
+            db.prepare("REPLACE INTO sessions (id, userID, created, expires, originIP, device, browser) VALUES (?, ?, ?, ?, ?, ?, ?)")
+                .run(this.id, this.userID, this.created?.getTime(), this.expires?.getTime(), this.originIP, this.device, this.browser);
+        });
+
+        return this;
     }
 }
 

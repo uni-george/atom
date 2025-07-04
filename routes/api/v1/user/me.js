@@ -12,7 +12,8 @@ module.exports = {
             (req, res, next) => {
                 res.json({
                     id: req.user.id,
-                    name: req.user.name
+                    name: req.user.name,
+                    avatarID: req.user.avatarID
                 });
             }
         ]

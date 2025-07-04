@@ -13,6 +13,8 @@ const GlobalPermissions = {
     AccessDashboard: "ACCESS_DASHBOARD",
     UploadFiles: "UPLOAD_FILES",
     DownloadFiles: "DOWNLOAD_FILES",
+    ManageUsers: "MANAGE_USERS",
+    EditProfile: "EDIT_PROFILE",
     // only used whe requiresAuthentication in /config/api/docs.json is set to true
     ViewAPIDocs: "VIEW_API_DOCS"
 }
