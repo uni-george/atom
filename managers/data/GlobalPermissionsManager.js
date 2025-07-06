@@ -10,16 +10,19 @@ const dbManager = require("./DatabaseManagers").DataDBManager;
  * @readonly
  */
 const GlobalPermissions = {
+    Administrator: "ADMINISTRATOR",
     AccessDashboard: "ACCESS_DASHBOARD",
     UploadFiles: "UPLOAD_FILES",
     DownloadFiles: "DOWNLOAD_FILES",
     ManageUsers: "MANAGE_USERS",
     EditProfile: "EDIT_PROFILE",
-    // only used whe requiresAuthentication in /config/api/docs.json is set to true
+    // only used when requiresAuthentication in /config/api/docs.json is set to true
     ViewAPIDocs: "VIEW_API_DOCS"
 }
 
 class GlobalPermissionsManager {
+    static permissions = GlobalPermissions;
+
     /**
      * Check if a user has a permission.
      * @param {string} userID The user's ID.
@@ -30,7 +33,13 @@ class GlobalPermissionsManager {
         if (!GlobalPermissionsManager.#validatePermission(permission)) throw new Error("Cannot check invalid permission.");
         if (!get(userID)) throw new Error("Cannot check permission for non-existent user.");
 
-        // TODO: add checking for user groups
+        // TODO: add checking for user groups etc
+        if (GlobalPermissionsManager.#userHasPermission(userID, GlobalPermissions.Administrator)) return true;
+        else return GlobalPermissionsManager.#userHasPermission(userID, permission);
+    }
+
+    static #userHasPermission(userID, permission) {
+        if (!GlobalPermissionsManager.#validatePermission(permission)) throw new Error("Cannot check invalid permission.");
         return dbManager.operation(db => db.prepare("SELECT * FROM userGlobalPermissions WHERE userID = ? AND permission = ?").get(userID, permission)) !== undefined;
     }
 
@@ -77,7 +86,5 @@ class GlobalPermissionsManager {
         return Object.keys(GlobalPermissions).map(x => GlobalPermissions[x]).includes(permission);
     }
 }
-
-GlobalPermissionsManager.Permissions = GlobalPermissions;
 
 module.exports = GlobalPermissionsManager;

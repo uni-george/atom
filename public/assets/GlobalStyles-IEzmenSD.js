@@ -1,1 +1,0 @@
-import{o as r,b as n,T as m,f}from"./Box-tQHUk4hz.js";import{o as s}from"./chunk-QMGIS6GS-IYNE5lo-.js";import{G as u}from"./ModeSwitcher-DJcFDofv.js";function p({styles:e,themeId:t,defaultTheme:a={}}){const o=r(a),l=typeof e=="function"?e(t&&o[t]||o):e;return s.jsx(u,{styles:l})}function b(e){return s.jsx(p,n({},e,{defaultTheme:f,themeId:m}))}export{b as G};

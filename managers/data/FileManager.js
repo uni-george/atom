@@ -134,7 +134,7 @@ class File {
         if (this.size <= 0) throw new ErrAtomErroror("Cannot save empty file.");
         if (this.size > FILE_MAX_BYTES) throw new AtomError("File is too large.");
 
-        if (!GlobalPermissionsManager.checkUser(this.addedBy, GlobalPermissionsManager.Permissions.UploadFiles)) throw new Error("User does not have sufficient permission to upload files.")
+        if (!GlobalPermissionsManager.checkUser(this.addedBy, GlobalPermissionsManager.permissions.UploadFiles)) throw new Error("User does not have sufficient permission to upload files.")
 
         this.name ||= "unnamed file";
         if (!this.name.match(FileManager.fileNamePattern)) throw new AtomError(`File names must follow RegEx: ${FileManager.fileNamePattern.toString?.()}`);

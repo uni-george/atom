@@ -9,7 +9,20 @@ const snowflake = new SnowflakeID();
 
 const dbManager = require("./DatabaseManagers").DataDBManager;
 
+/**
+ * An enum of columns possible to sort by.
+ * @enum {string}
+ * @readonly
+ */
+const UserSortByColumns = {
+    id: "id",
+    name: "name"
+}
+
 class UserManager {
+    static sortByColumns = UserSortByColumns;
+    static namePattern = /^.{1,48}$/;
+
     /**
      * Get a user from their ID.
      * @param {string} userID The user's ID.
@@ -28,6 +41,63 @@ class UserManager {
      */
     static create() {
         return new User();
+    }
+
+    /**
+     * Search for users.
+     * @param {UserSearchParams} searchParams The parameters for the search.
+     * @returns {User[]} The found users.
+     */
+    static search(searchParams) {
+        let limit = searchParams.limit === undefined ? 50 : Math.max(Math.min(searchParams.limit, 50), 0);
+        let offset = searchParams.offset === undefined ? 0 : Math.max(searchParams.offset, 0);
+        let group = searchParams.group;
+
+        let sortBy = Object.keys(UserManager.sortByColumns).includes(searchParams.sortBy) ? searchParams.sortBy : UserManager.sortByColumns.name;
+        let sortDirection = searchParams.sortDirection == "ascending" ? "ASC" : searchParams.sortDirection == "descending" ? "DESC" : "ASC";
+
+        let name = (searchParams.name || "").replaceAll(/[%_\\]/g, "\\$&");
+
+        let entries = dbManager.operation(db => (
+            db.prepare(`
+                SELECT *
+                FROM users
+                WHERE
+                    CASE
+                        WHEN ? = 1
+                        THEN id = (
+                            SELECT userID
+                            FROM groupMember
+                            WHERE groupID = (
+                                WITH RECURSIVE
+                                    descendant(id) AS (
+                                        VALUES(?)
+                                        UNION ALL
+                                        SELECT groups.id
+                                        FROM groups
+                                        JOIN descendant
+                                        ON groups.parentID = descendant.id
+                                    )
+                                SELECT id FROM descendant
+                            )
+                        )
+                        ELSE 1
+                    END
+                AND
+                    CASE
+                        WHEN ? = 1
+                        THEN name LIKE ? ESCAPE '\\'
+                        ELSE 1
+                    END
+                ORDER BY ${sortBy} ${sortDirection}
+                LIMIT ?
+                OFFSET ?
+            `).all(group ? 1 : 0, group, name ? 1 : 0, `%${name}%`, limit, offset)
+        ));
+
+        if (!entries) return [];
+
+        return entries.map(x => UserManager.create().readFromEntry(x));
     }
 }
 
@@ -212,13 +282,22 @@ class UserSession {
     }
 }
 
-module.exports = UserManager;
-
 /**
- * 
  * @typedef {Object} SessionCreationSettings
  * @property {Date} validDuration
  * @property {string=} originIP
  * @property {string=} device
  * @property {string=} browser
  */
+
+/**
+ * @typedef {Object} UserSearchParams
+ * @property {number=} limit
+ * @property {number=} offset
+ * @property {string=} group
+ * @property {UserSortByColumns=} sortBy
+ * @property {"ascending"|"descending"=} sortDirection
+ * @property {string=} name
+ */
+
+module.exports = UserManager;

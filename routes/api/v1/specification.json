@@ -53,6 +53,9 @@
                     "name": {
                         "type": "string",
                         "description": "The user's display name."
+                    },
+                    "avatarID": {
+                        "$ref": "#/components/schemas/Snowflake"
                     }
                 }
             },
@@ -139,6 +142,10 @@
         {
             "name": "auth",
             "description": "Authentication-related endpoints."
+        },
+        {
+            "name": "file",
+            "description": "Endpoints related to user-generated files."
         },
         {
             "name": "test"
@@ -240,6 +247,37 @@
                 }
             }
         },
+        "/image/{id}": {
+            "get": {
+                "summary": "Get an image.",
+                "description": "Get the link to an image by its ID.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "$ref": "#/components/schemas/Snowflake"
+                        },
+                        "required": true,
+                        "description": "The image's ID."
+                    }
+                ],
+                "tags": [
+                    "file"
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirects to the requested image."
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/MalformedRequestError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ResourceNotFoundError"
+                    }
+                }
+            }
+        },
         "/user/me": {
             "get": {
                 "summary": "Get the current user.",
@@ -265,6 +303,153 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/UserNotAuthenticatedError"
+                    }
+                }
+            }
+        },
+        "/user/search": {
+            "get": {
+                "summary": "Search users.",
+                "description": "Get multiple users based on search conditions.",
+                "tags": [
+                    "user"
+                ],
+                "security": [
+                    {
+                        "Cookie": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 50,
+                            "minimum": 1,
+                            "example": 5
+                        },
+                        "required": false,
+                        "description": "The maximum number of results."
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "example": 0
+                        },
+                        "required": false,
+                        "description": "The offset to apply to the results."
+                    },
+                    {
+                        "in": "query",
+                        "name": "group",
+                        "schema": {
+                            "$ref": "#/components/schemas/Snowflake"
+                        },
+                        "required": false,
+                        "description": "The group the users should be in. Results will include users within child groups."
+                    },
+                    {
+                        "in": "query",
+                        "name": "sortBy",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "id",
+                                "name"
+                            ]
+                        },
+                        "required": false,
+                        "description": "The value to sort the results by."
+                    },
+                    {
+                        "in": "query",
+                        "name": "sortDirection",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "ascending",
+                                "descending"
+                            ]
+                        },
+                        "required": false,
+                        "description": "The direction to sort the results in."
+                    },
+                    {
+                        "in": "query",
+                        "name": "name",
+                        "schema": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 48
+                        },
+                        "required": false,
+                        "description": "The name (or part of the name) to use to search for users."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The resulting users.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/User"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/MalformedRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UserNotAuthenticatedError"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UserNotAuthorisedError"
+                    }
+                }
+            }
+        },
+        "/user/{id}": {
+            "get": {
+                "summary": "Get a user.",
+                "description": "Get a user's details by their ID.",
+                "tags": [
+                    "user"
+                ],
+                "security": [
+                    {
+                        "Cookie": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/MalformedRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UserNotAuthenticatedError"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UserNotAuthorisedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ResourceNotFoundError"
                     }
                 }
             }

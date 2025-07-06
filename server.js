@@ -23,6 +23,8 @@ DatabaseManagers.DataDBManager.setDefinitions([
     // user groups
     "groups (id TEXT, name TEXT, parentID TEXT, colour TEXT, PRIMARY KEY(id))",
 
+    "groupMember (groupID TEXT, userID TEXT, PRIMARY KEY(groupID, userID))",
+
     // permissions
     "userGlobalPermissions (userID TEXT, permission TEXT, PRIMARY KEY(userID, permission))",
     "groupGlobalPermissions (groupID TEXT, permission TEXT, PRIMARY KEY(groupID, permission))",
@@ -87,7 +89,7 @@ ServerManager.app.use(passport.session());
 
 // api json parsing
 const express = require("express");
-const { MalformedRequest } = require("./util/standardResponses");
+const { MalformedRequest, UserUnauthenticated, UserUnauthorised } = require("./util/standardResponses");
 ServerManager.app.use(express.json());
 ServerManager.app.use("/api", (err, req, res, next) => {
     if (err instanceof SyntaxError) return MalformedRequest(res);
@@ -96,6 +98,7 @@ ServerManager.app.use("/api", (err, req, res, next) => {
 
 // api docs
 if (require("./config/api/docs.json")) {
+    const config = require("./config/api/docs.json");
     const swaggerUI = require("swagger-ui-express");
     [
         "v1"
@@ -103,7 +106,13 @@ if (require("./config/api/docs.json")) {
         try {
             const document = require(`./routes/api/${x}/specification.json`);
             
-            ServerManager.app.use(`/api/${x}/docs`, swaggerUI.serve, swaggerUI.setup(document));
+            ServerManager.app.use(`/api/${x}/docs`, (req, res, next) => {
+                // permission lock
+                if (!config.requiresAuthentication) return next();
+                else if (!req.user) return UserUnauthenticated(res);
+                else if (!GlobalPermissionsManager.checkUser(req.user.id, GlobalPermissionsManager.permissions.ViewAPIDocs)) return UserUnauthorised(res);
+                else return next();
+            }, swaggerUI.serve, swaggerUI.setup(document));
         } catch (e) {
             warn(`Couldn't load API specification for version ${x}:\n${e}`)
         }
@@ -129,6 +138,7 @@ ServerManager.app.use((err, req, res, next) => {
 const UserManager = require("./managers/data/UserManager");
 const AuthManager = require("./managers/auth/AuthManager");
 const { warn } = require("console");
+const GlobalPermissionsManager = require("./managers/data/GlobalPermissionsManager");
 // const LocalAuthManager = require("./managers/auth/LocalAuthManager");
 
 // console interface for debugging if debug mode is on

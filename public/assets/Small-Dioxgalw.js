@@ -1,1 +1,0 @@
-import{o as e}from"./chunk-QMGIS6GS-IYNE5lo-.js";import{T as p}from"./Stack-DlM8arli.js";const m=o=>{const{sx:r,children:s,...t}=o;return e.jsx(p,{level:"body-xs",sx:{opacity:"0.5",...r},...t,children:s})};export{m as S};

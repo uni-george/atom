@@ -1,0 +1,1 @@
+import{a as t}from"./chunk-QMGIS6GS-IYNE5lo-.js";const a=t.createContext(void 0);function e(){const o=t.useContext(a);if(!o)throw new Error("Dashboard navigation context is not yet populated.");return o}const r={home:0,users:1,images:2,files:3,userGroups:4};export{r as D,a,e as u};
