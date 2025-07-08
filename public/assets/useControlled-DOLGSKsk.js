@@ -1,1 +1,0 @@
-import{a as e}from"./chunk-QMGIS6GS-IYNE5lo-.js";const i=typeof window<"u"?e.useLayoutEffect:e.useEffect;function E({controlled:t,default:s,name:l,state:r="value"}){const{current:a}=e.useRef(t!==void 0),[u,n]=e.useState(s),o=a?t:u,f=e.useCallback(c=>{a||n(c)},[]);return[o,f]}export{E as a,i as u};

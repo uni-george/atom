@@ -1,0 +1,1 @@
+import{o as t,a}from"./chunk-QMGIS6GS-IYNE5lo-.js";import{B as r}from"./Stack-0SagYPpj.js";import{u as e}from"./dashboardSidebar-CNRdVuWc.js";const m=({children:s})=>t.jsx(r,{sx:{display:"flex",flexGrow:1,px:{xs:2,md:6},py:{xs:2,md:3}},children:s}),p=s=>{const{setNavigationContext:o}=e();a.useEffect(()=>{o(s)},[])};export{m as D,p as s};

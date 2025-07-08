@@ -99,6 +99,55 @@ class UserManager {
 
         return entries.map(x => UserManager.create().readFromEntry(x));
     }
+
+    /**
+     * Get the total number of results for a user search query.
+     * @param {UserSearchParams} searchParams The parameters for the search.
+     * @returns {number} The number of users that meet the requirements.
+     */
+    static count(searchParams) {
+        let group = searchParams.group;
+
+        let name = (searchParams.name || "").replaceAll(/[%_\\]/g, "\\$&");
+
+        let entry = dbManager.operation(db => (
+            db.prepare(`
+                SELECT COUNT(*)
+                FROM users
+                WHERE
+                    CASE
+                        WHEN ? = 1
+                        THEN id = (
+                            SELECT userID
+                            FROM groupMember
+                            WHERE groupID = (
+                                WITH RECURSIVE
+                                    descendant(id) AS (
+                                        VALUES(?)
+                                        UNION ALL
+                                        SELECT groups.id
+                                        FROM groups
+                                        JOIN descendant
+                                        ON groups.parentID = descendant.id
+                                    )
+                                SELECT id FROM descendant
+                            )
+                        )
+                        ELSE 1
+                    END
+                AND
+                    CASE
+                        WHEN ? = 1
+                        THEN name LIKE ? ESCAPE '\\'
+                        ELSE 1
+                    END
+            `).get(group ? 1 : 0, group, name ? 1 : 0, `%${name}%`)
+        ));
+
+        if (!entry) return 0;
+
+        return entry["COUNT(*)"];
+    }
 }
 
 class User {

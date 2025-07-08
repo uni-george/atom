@@ -416,6 +416,69 @@
                 }
             }
         },
+        "/user/count": {
+            "get": {
+                "summary": "Get the number of search results.",
+                "description": "Get the total number of results a search query provides.",
+                "tags": [
+                    "user"
+                ],
+                "security": [
+                    {
+                        "Cookie": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "group",
+                        "schema": {
+                            "$ref": "#/components/schemas/Snowflake"
+                        },
+                        "required": false,
+                        "description": "The group the users should be in. Results will include users within child groups."
+                    },
+                    {
+                        "in": "query",
+                        "name": "name",
+                        "schema": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 48
+                        },
+                        "required": false,
+                        "description": "The name (or part of the name) to use to search for users."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The number of results the search query provides.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "count": {
+                                            "type": "integer",
+                                            "description": "The number of results."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/MalformedRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UserNotAuthenticatedError"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UserNotAuthorisedError"
+                    }
+                }
+            }
+        },
         "/user/{id}": {
             "get": {
                 "summary": "Get a user.",
