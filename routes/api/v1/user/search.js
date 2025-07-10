@@ -58,6 +58,7 @@ module.exports = {
                 .withMessage("Provided sort direction must be one of: ascending, descending"),
             query("name")
                 .optional()
+                .trim()
                 .isString()
                 .withMessage("Provided name must be a string.")
                 .matches(UserManager.namePattern)

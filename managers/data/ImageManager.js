@@ -3,10 +3,15 @@
 const AtomError = require("../../util/AtomError");
 const FileManager = require("./FileManager");
 const dbManager = require("./DatabaseManagers").DataDBManager;
+const fileDBManager = require("./DatabaseManagers").FileDBManager;
 const SnowflakeID = require("snowflake-id").default;
 const snowflake = new SnowflakeID();
 
 class ImageManager {
+    static acceptedTypes = ["bmp", "jpeg", "png"]
+    static typeRegex = new RegExp(`^image\\\/(${ImageManager.acceptedTypes.map(x => require("regex-escape")(x)).join("|")})$`);
+    static imageMaxSize = 4 * 1024; // 4 kiB
+
     /**
      * Get an image from its ID.
      * @param {string} id The image's ID.
@@ -25,6 +30,63 @@ class ImageManager {
      */
     static create() {
         return new Image();
+    }
+
+
+
+    // TODO
+    /**
+     *  _________  ________  ________  ________          
+     * |\___   ___\\   __  \|\   ___ \|\   __  \  ___    
+     * \|___ \  \_\ \  \|\  \ \  \_|\ \ \  \|\  \|\__\   
+     *      \ \  \ \ \  \\\  \ \  \ \\ \ \  \\\  \|__|   
+     *       \ \  \ \ \  \\\  \ \  \_\\ \ \  \\\  \  ___ 
+     *        \ \__\ \ \_______\ \_______\ \_______\|\__\
+     *         \|__|  \|_______|\|_______|\|_______|\|__|
+     *
+     * REPLACE IMAGE SEARCH WITH SOME SORT OF FILE SEARCH
+     * likely just limit the displayed files to files that
+     * are registered as images somehow?
+     * 
+     * i'll let tomorrow me figure that out (enjoy)                                                                             
+     */
+
+
+
+    /**
+     * Search images based on a set of conditions.
+     * @param {ImageSearchParams} params The search parameters.
+     * @returns {Image[]} The resulting images.
+     */
+    static search(params) {
+        let entries;
+
+        let internal = params.internal || false;
+        let limit = Math.min(Math.max(0, params.limit || 50), 50); 
+        let offset = Math.max(0, params.offset || 0);
+        let name = params.name;
+        let uploadedBy = params.uploadedBy;
+        
+        if (params.internal) {
+            if (!params.uploadedBy && params.type) {
+                entries = dbManager.operation(db => 
+                    db.prepare(`
+                        SELECT *
+                        FROM images
+                        WHERE
+                        internal = 1
+                        LIMIT ?
+                        OFFSET ?
+                    `).all(limit, offset)
+                );
+            } else {
+                
+            }
+        } else {
+
+        }
+
+        return entries.map(x => ImageManager.create().readFromEntry(x));
     }
 }
 
@@ -115,3 +177,13 @@ class Image {
 }
 
 module.exports = ImageManager;
+
+/**
+ * @typedef {Object} ImageSearchParams
+ * @property {number=} limit
+ * @property {number=} offset
+ * @property {string=} name
+ * @property {string=} type
+ * @property {boolean=} internal
+ * @property {string=} uploadedBy
+ */

@@ -23,6 +23,7 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
     "pretty-format": "^30.0.2",
+    "regex-escape": "^3.4.11",
     "snowflake-id": "^1.1.0",
     "swagger-ui-express": "^5.0.1",
     "winston": "^3.17.0"
