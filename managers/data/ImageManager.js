@@ -32,61 +32,89 @@ class ImageManager {
         return new Image();
     }
 
-
-
-    // TODO
-    /**
-     *  _________  ________  ________  ________          
-     * |\___   ___\\   __  \|\   ___ \|\   __  \  ___    
-     * \|___ \  \_\ \  \|\  \ \  \_|\ \ \  \|\  \|\__\   
-     *      \ \  \ \ \  \\\  \ \  \ \\ \ \  \\\  \|__|   
-     *       \ \  \ \ \  \\\  \ \  \_\\ \ \  \\\  \  ___ 
-     *        \ \__\ \ \_______\ \_______\ \_______\|\__\
-     *         \|__|  \|_______|\|_______|\|_______|\|__|
-     *
-     * REPLACE IMAGE SEARCH WITH SOME SORT OF FILE SEARCH
-     * likely just limit the displayed files to files that
-     * are registered as images somehow?
-     * 
-     * i'll let tomorrow me figure that out (enjoy)                                                                             
-     */
-
-
-
     /**
      * Search images based on a set of conditions.
      * @param {ImageSearchParams} params The search parameters.
      * @returns {Image[]} The resulting images.
      */
     static search(params) {
+        /** @type {Object[]} */
         let entries;
 
         let internal = params.internal || false;
         let limit = Math.min(Math.max(0, params.limit || 50), 50); 
         let offset = Math.max(0, params.offset || 0);
-        let name = params.name;
+        let name = (params.name || "").replaceAll(/[%_\\]/g, "\\$&");
         let uploadedBy = params.uploadedBy;
+        let type = params.type;
         
-        if (params.internal) {
-            if (!params.uploadedBy && params.type) {
-                entries = dbManager.operation(db => 
+        if (internal) {
+            entries = dbManager.operation(db => 
+                db.prepare(`
+                    SELECT *
+                    FROM images
+                    WHERE isExternal = 0
+                    ORDER BY id DESC
+                    LIMIT ?
+                    OFFSET ?
+                `).all(limit, offset)
+            );
+            if (name || uploadedBy || type) {
+                /** @type {string[]} */
+                let filterFiles = fileDBManager.operation(db => 
                     db.prepare(`
-                        SELECT *
-                        FROM images
+                        SELECT id, name
+                        FROM files
                         WHERE
-                        internal = 1
-                        LIMIT ?
-                        OFFSET ?
-                    `).all(limit, offset)
+                            CASE 
+                                WHEN ? = 1
+                                THEN name LIKE ? ESCAPE '\\'
+                                ELSE 1
+                            END
+                        AND
+                            CASE
+                                WHEN ? = 1
+                                THEN addedBy = ?
+                                ELSE 1
+                            END
+                        AND
+                            CASE
+                                WHEN ? = 1
+                                THEN mime = ?
+                                ELSE 1
+                            END
+                    `).all(name ? 1 : 0, name, uploadedBy ? 1 : 0, uploadedBy, type ? 1 : 0, `image/${type}`)
                 );
-            } else {
+
+                let filterFileIDs = filterFiles.map(x => x?.id);
                 
+                entries = entries.filter(x => filterFileIDs.includes(x.id));
+                entries.forEach(x => {
+                    let i;
+                    if (i = filterFiles.findIndex(y => y.id == x.id)) {
+                        x.name = filterFiles[i].name;
+                        return;
+                    }
+                })
             }
         } else {
-
+            entries = dbManager.operation(db => 
+                db.prepare(`
+                    SELECT *
+                    FROM images
+                    WHERE
+                    isExternal = 1
+                    ORDER BY id DESC
+                    LIMIT ?
+                    OFFSET ?
+                `).all(limit, offset)
+            );
         }
 
-        return entries.map(x => ImageManager.create().readFromEntry(x));
+        return entries.map(x => ImageManager.create().readFromEntry(x)).map(x => {
+            x.url = x.getURL();
+            return x;
+        });
     }
 }
 
@@ -126,6 +154,7 @@ class Image {
      */
     readFromEntry(entry) {
         [
+            "name", // added for search stuff
             "id",
             "source"
         ].forEach(x => {
@@ -173,6 +202,20 @@ class Image {
         });
         
         delete this;
+    }
+
+    /**
+     * Get the source URL of this image.
+     * @returns {string} The URL to the image.
+     */
+    getURL() {
+        if (!this.id) throw new AtomError("Cannot get image without ID.");
+        if (!this.isExternal) {
+            let file = this.getFile();
+            return `/file/${encodeURIComponent(file.id)}/${encodeURIComponent(file.name)}`
+        } else {
+            return this.source;
+        }
     }
 }
 

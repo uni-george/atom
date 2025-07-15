@@ -14,6 +14,10 @@ module.exports = {
         /** @type {import("express").Handler[]} */
         get: [
             isAuthenticated,
+            (req, res, next) => {
+                Object.defineProperty(req, 'query', { ...Object.getOwnPropertyDescriptor(req, 'query'), value: req.query, writable: true });
+                next();
+            },
             query("name")
                 .optional()
                 .trim()
@@ -68,9 +72,16 @@ module.exports = {
                     return MalformedRequest(res, issues);
                 }
 
-                return res.json({
-                    woo: `${ImageManager.typeRegex}`
-                });
+                return res.json(
+                    ImageManager.search({
+                        name: req.query.name,
+                        internal: req.query.internal,
+                        limit: req.query.limit,
+                        offset: req.query.offset,
+                        type: req.query.type,
+                        uploadedBy: req.query.uploadedBy
+                    })
+                );
             }
         ]
     }

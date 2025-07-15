@@ -27,7 +27,7 @@ module.exports = {
 
                 if (image.isExternal) {
                     if (!image.source) return ResourceNotFound(res);
-                    else return res.redirect(image.source);
+                    else return res.redirect(image.getURL());
                 } else {
                     let file = image.getFile();
                     if (!file) {
@@ -36,7 +36,7 @@ module.exports = {
                         return ResourceNotFound(res);
                     }
 
-                    return res.redirect(`/file/${encodeURIComponent(file.id)}/${encodeURIComponent(file.name)}`);
+                    return res.redirect(image.getURL());
                 }
             }
         ]
