@@ -20,7 +20,7 @@
             }
         },
         "schemas": {
-            "Error": {
+            "StandardResponse": {
                 "type": "object",
                 "required": [
                     "code"
@@ -59,6 +59,29 @@
                     }
                 }
             },
+            "Image": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "properties": {
+                    "id": {
+                        "$ref": "#/components/schemas/Snowflake"
+                    },
+                    "isExternal": {
+                        "type": "boolean",
+                        "description": "Whether the image is external or not."
+                    },
+                    "source": {
+                        "type": "string",
+                        "description": "If the image is internal, then the image's file ID. Else the image's URL."
+                    },
+                    "url": {
+                        "type": "string",
+                        "description": "The URL of the image."
+                    }
+                }
+            },
             "Snowflake": {
                 "type": "string",
                 "example": "0123456789876543210",
@@ -76,12 +99,26 @@
             }
         },
         "responses": {
-            "MalformedRequestError": {
-                "description": "The server could understand the user's request/the user's request was invalid.",
+            "ActionSuccessful": {
+                "description": "The action was carried out successfully.",
                 "content": {
                     "application/json": {
                         "schema": {
-                            "$ref": "#/components/schemas/Error"
+                            "$ref": "#/components/schemas/StandardResponse"
+                        },
+                        "example": {
+                            "code": 200,
+                            "message": "Action carried out successfully."
+                        }
+                    }
+                }
+            },
+            "MalformedRequestError": {
+                "description": "The server couldn't understand the user's request/the user's request was invalid.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/StandardResponse"
                         },
                         "example": {
                             "code": 400,
@@ -95,7 +132,7 @@
                 "content": {
                     "application/json": {
                         "schema": {
-                            "$ref": "#/components/schemas/Error"
+                            "$ref": "#/components/schemas/StandardResponse"
                         },
                         "example": {
                             "code": 401,
@@ -109,7 +146,7 @@
                 "content": {
                     "application/json": {
                         "schema": {
-                            "$ref": "#/components/schemas/Error"
+                            "$ref": "#/components/schemas/StandardResponse"
                         },
                         "example": {
                             "code": 403,
@@ -123,7 +160,7 @@
                 "content": {
                     "application/json": {
                         "schema": {
-                            "$ref": "#/components/schemas/Error"
+                            "$ref": "#/components/schemas/StandardResponse"
                         },
                         "example": {
                             "code": 404,
@@ -246,6 +283,117 @@
                     }
                 }
             }
+        },
+        "/image/search": {
+            "get": {
+                "summary": "Search images.",
+                "description": "Get multiple images based on search conditions.",
+                "tags": [
+                    "file"
+                ],
+                "security": [
+                    {
+                        "Cookie": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 50,
+                            "minimum": 1,
+                            "example": 5,
+                            "default": 50
+                        },
+                        "required": false,
+                        "description": "The maximum number of results."
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "example": 0,
+                            "default": 0
+                        },
+                        "required": false,
+                        "description": "The offset to apply to the results."
+                    },
+                    {
+                        "in": "query",
+                        "name": "internal",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "required": false,
+                        "description": "Whether to search internal or external images."
+                    },
+                    {
+                        "in": "query",
+                        "name": "name",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 32,
+                            "minLength": 1
+                        },
+                        "required": false,
+                        "description": "The image's name."
+                    },
+                    {
+                        "in": "query",
+                        "name": "type",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "bmp",
+                                "jpeg",
+                                "png"
+                            ]
+                        },
+                        "required": false,
+                        "description": "The type of image."
+                    },
+                    {
+                        "in": "query",
+                        "name": "uploadedBy",
+                        "schema": {
+                            "$ref": "#/components/schemas/Snowflake"
+                        },
+                        "required": false,
+                        "description": "The uploader."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The resulting images.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Image"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/MalformedRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UserNotAuthenticatedError"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UserNotAuthorisedError"
+                    }
+                }
+            }
+        },
+        "/image/count": {
+
         },
         "/image/{id}": {
             "get": {
@@ -491,6 +639,17 @@
                         "Cookie": []
                     }
                 ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "$ref": "#/components/schemas/Snowflake"
+                        },
+                        "required": true,
+                        "description": "The user's ID."
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "The requested user.",
@@ -501,6 +660,114 @@
                                 }
                             }
                         }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/MalformedRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UserNotAuthenticatedError"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UserNotAuthorisedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ResourceNotFoundError"
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Update a user.",
+                "description": "Update a user's details by their ID.",
+                "tags": [
+                    "user"
+                ],
+                "security": [
+                    {
+                        "Cookie": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "$ref": "#/components/schemas/Snowflake"
+                        },
+                        "required": true,
+                        "description": "The user's ID."
+                    }
+                ],
+                "requestBody": {
+                    "description": "An object containing updated details.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "test username",
+                                        "maxLength": 48,
+                                        "minLength": 1
+                                    },
+                                    "avatarID": {
+                                        "$ref": "#/components/schemas/Snowflake"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The updated user.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/MalformedRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UserNotAuthenticatedError"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UserNotAuthorisedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ResourceNotFoundError"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a user.",
+                "description": "Delete a user by their ID.",
+                "tags": [
+                    "user"
+                ],
+                "security": [
+                    {
+                        "Cookie": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "$ref": "#/components/schemas/Snowflake"
+                        },
+                        "required": true,
+                        "description": "The user's ID."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/ActionSuccessful"
                     },
                     "400": {
                         "$ref": "#/components/responses/MalformedRequestError"

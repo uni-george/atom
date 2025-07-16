@@ -75,7 +75,9 @@ class DatabaseManager {
         let db = require("better-sqlite3")(this.#path);
         let output;
         try {
-            output = f(db);
+            db.transaction(() => {
+                output = f(db);
+            })();
         } catch (e) {
             db.close();
             throw e;

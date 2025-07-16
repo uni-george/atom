@@ -239,6 +239,24 @@ class User {
 
         return token;
     }
+
+    /**
+     * Permanently delete this user.
+     */
+    delete() {
+        if (!this.id) throw new Error("Cannot delete user without an ID.");
+
+        dbManager.operation(db => {
+            db.prepare("DELETE FROM googleLogins WHERE userID = ?").run(this.id);
+            db.prepare("DELETE FROM groupMember WHERE userID = ?").run(this.id);
+            db.prepare("DELETE FROM localLogins WHERE userID = ?").run(this.id);
+            db.prepare("DELETE FROM sessions WHERE userID = ?").run(this.id);
+            db.prepare("DELETE FROM userGlobalPermissions WHERE userID = ?").run(this.id);
+            db.prepare("DELETE FROM users WHERE id = ?").run(this.id);
+        });
+
+        delete this;
+    }
 }
 
 class UserSession {
