@@ -10,14 +10,19 @@ const dbManager = require("./DatabaseManagers").DataDBManager;
  * @readonly
  */
 const GlobalPermissions = {
-    Administrator: "ADMINISTRATOR",
-    AccessDashboard: "ACCESS_DASHBOARD",
-    UploadFiles: "UPLOAD_FILES",
-    DownloadFiles: "DOWNLOAD_FILES",
-    ManageUsers: "MANAGE_USERS",
-    EditProfile: "EDIT_PROFILE",
-    // only used when requiresAuthentication in /config/api/docs.json is set to true
-    ViewAPIDocs: "VIEW_API_DOCS"
+    Administrator:          "ADMINISTRATOR",
+    AccessDashboard:        "ACCESS_DASHBOARD",
+    UploadFiles:            "UPLOAD_FILES",
+    DownloadFiles:          "DOWNLOAD_FILES",
+    ManageUsers:            "MANAGE_USERS",
+    EditProfile:            "EDIT_PROFILE",
+    ViewAPIDocs:            "VIEW_API_DOCS", // only used when requiresAuthentication in /config/api/docs.json is set to true
+    CreateContent:          "CREATE_CONTENT",
+    EditContent:            "EDIT_CONTENT",
+    DeleteContent:          "DELETE_CONTENT",
+    CreateContentFolders:   "CREATE_CONTENT_FOLDERS",
+    EditContentFolders:     "EDIT_CONTENT_FOLDERS",
+    DeleteContentFolders:   "DELETE_CONTENT_FOLDERS"
 }
 
 class GlobalPermissionsManager {

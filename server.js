@@ -30,7 +30,15 @@ DatabaseManagers.DataDBManager.setDefinitions([
     "groupGlobalPermissions (groupID TEXT, permission TEXT, PRIMARY KEY(groupID, permission))",
 
     // images
-    "images (id TEXT, isExternal INTEGER DEFAULT 1, source TEXT, PRIMARY KEY(id))"
+    "images (id TEXT, isExternal INTEGER DEFAULT 1, source TEXT, PRIMARY KEY(id))",
+
+    // actual front end stuff
+    "contentFolders (id TEXT, name TEXT, parentID TEXT, PRIMARY KEY(id))",
+    "content (id TEXT, name TEXT, type TEXT, parentID TEXT, data TEXT, PRIMARY KEY(id))",
+    "elements (id TEXT, parentID TEXT, componentID TEXT, data TEXT, PRIMARY KEY(id))",
+    "components (id TEXT, parentID TEXT, type TEXT, data TEXT, PRIMARY KEY(id))",
+    "pages (id TEXT, elementID TEXT, route TEXT, parentID TEXT, PRIMARY KEY(id))"
+    
 ]).init(join(__dirname, "databases", "data.sqlite"));
 
 DatabaseManagers.FileDBManager.setDefinitions([
@@ -140,6 +148,8 @@ const AuthManager = require("./managers/auth/AuthManager");
 const { warn } = require("console");
 const GlobalPermissionsManager = require("./managers/data/GlobalPermissionsManager");
 // const LocalAuthManager = require("./managers/auth/LocalAuthManager");
+const ContentFolderManager = require("./managers/data/content/ContentFolderManager");
+const ContentManager = require("./managers/data/content/ContentManager");
 
 // console interface for debugging if debug mode is on
 // disabled when debug is off

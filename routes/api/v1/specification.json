@@ -82,6 +82,94 @@
                     }
                 }
             },
+            "ContentFolder": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "properties": {
+                    "id": {
+                        "$ref": "#/components/schemas/Snowflake"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the folder."
+                    },
+                    "path": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "id"
+                            ],
+                            "properties": {
+                                "id": {
+                                    "$ref": "#/components/schemas/Snowflake"
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "maxLength": 32,
+                                    "minLength": 1
+                                }
+                            }
+                        }
+                    },
+                    "childFolders": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Snowflake"
+                        },
+                        "description": "The IDs of any child folders."
+                    },
+                    "childContent": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Content"
+                        },
+                        "description": "An array of simplified versions of the content contained in the folder."
+                    }
+                }
+            },
+            "Content": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "type"
+                ],
+                "properties": {
+                    "id": {
+                        "$ref": "#/components/schemas/Snowflake"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the content."
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "string",
+                            "number"
+                        ],
+                        "description": "The type of the content."
+                    },
+                    "parentID": {
+                        "$ref": "#/components/schemas/Snowflake",
+                        "description": "The ID of the content's parent folder."
+                    },
+                    "data": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "description": "The content."
+                            },
+                            {
+                                "type": "number",
+                                "description": "The content."
+                            }
+                        ]
+                    }
+                }
+            },
             "Snowflake": {
                 "type": "string",
                 "example": "0123456789876543210",
@@ -173,6 +261,10 @@
     },
     "tags": [
         {
+            "name": "content",
+            "description": "Content-related endpoints."
+        },
+        {
             "name": "user",
             "description": "User-related endpoints."
         },
@@ -189,6 +281,224 @@
         }
     ],
     "paths": {
+        "/content/{id}": {
+            "get": {
+                "summary": "Get a bit of content.",
+                "description": "Get a bit of text/numeric content by its ID.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "$ref": "#/components/schemas/Snowflake"
+                        },
+                        "required": true,
+                        "description": "The content's ID."
+                    }
+                ],
+                "tags": [
+                    "content"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested bit of content.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Content"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/MalformedRequestError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ResourceNotFoundError"
+                    }
+                }
+            }
+        },
+        "/content/folder": {
+            "post": {
+                "summary": "Create a folder.",
+                "description": "Create a content folder with provided parameters.",
+                "tags": [
+                    "content"
+                ],
+                "requestBody": {
+                    "description": "An object containing updated details.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "example folder name",
+                                        "maxLength": 32,
+                                        "minLength": 1
+                                    },
+                                    "parentID": {
+                                        "$ref": "#/components/schemas/Snowflake"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The created folder.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ContentFolder"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/MalformedRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UserNotAuthenticatedError"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UserNotAuthorisedError"
+                    }
+                }
+            }
+        },
+        "/content/folder/{id}": {
+            "get": {
+                "summary": "Get a folder.",
+                "description": "Get info regarding a content folder by its ID.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "$ref": "#/components/schemas/Snowflake"
+                        },
+                        "required": true,
+                        "description": "The folder's ID."
+                    },
+                    {
+                        "in": "query",
+                        "name": "includeContent",
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        },
+                        "required": false,
+                        "description": "Whether to include an abridged version of the folder's contents."
+                    },
+                    {
+                        "in": "query",
+                        "name": "includePath",
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        },
+                        "required": false,
+                        "description": "Whether to include a descriptor of the path to the folder."
+                    }
+                ],
+                "tags": [
+                    "content"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested content folder.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ContentFolder"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/MalformedRequestError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ResourceNotFoundError"
+                    }
+                }
+            },
+            "patch": {
+                "summary": "Edit a folder.",
+                "description": "Edit info regarding a content folder by its ID.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "$ref": "#/components/schemas/Snowflake"
+                        },
+                        "required": true,
+                        "description": "The folder's ID."
+                    }
+                ],
+                "tags": [
+                    "content"
+                ],
+                "security": [
+                    {
+                        "Cookie": []
+                    }
+                ],
+                "requestBody": {
+                    "description": "An object containing updated details.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "test folder name",
+                                        "maxLength": 32,
+                                        "minLength": 1
+                                    },
+                                    "parentID": {
+                                        "$ref": "#/components/schemas/Snowflake"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The action was carried out successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ContentFolder"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/MalformedRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UserNotAuthenticatedError"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UserNotAuthorisedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ResourceNotFoundError"
+                    }
+                }
+            }
+        },
         "/test": {
             "get": {
                 "summary": "Check API is online.",

@@ -68,7 +68,7 @@ class UserManager {
                         THEN id = (
                             SELECT userID
                             FROM groupMember
-                            WHERE groupID = (
+                            WHERE groupID IN (
                                 WITH RECURSIVE
                                     descendant(id) AS (
                                         VALUES(?)
