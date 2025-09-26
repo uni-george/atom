@@ -1,0 +1,1 @@
+import{o as t}from"./chunk-QMGIS6GS-DtoyICqO.js";import{j as o,d as m}from"./Stack-JCjNLC7t.js";import{G as r}from"./ModeSwitcher-XgJRqYip.js";function f(e){return t.jsx(r,{...e,defaultTheme:m,themeId:o})}export{f as G};

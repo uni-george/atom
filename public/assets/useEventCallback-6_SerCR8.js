@@ -1,0 +1,1 @@
+import{a as t}from"./chunk-QMGIS6GS-DtoyICqO.js";import{u as c}from"./Popper-DEf3PWv7.js";function a(e){const r=t.useRef(e);return c(()=>{r.current=e}),t.useRef((...u)=>(0,r.current)(...u)).current}export{a as u};

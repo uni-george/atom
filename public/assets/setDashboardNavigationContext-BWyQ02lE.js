@@ -1,0 +1,1 @@
+import{o as a,a as r}from"./chunk-QMGIS6GS-DtoyICqO.js";import{B as x}from"./Stack-JCjNLC7t.js";import{u as e}from"./GlobalPermissionCheck-D0CbPT0Q.js";const p=({children:t})=>a.jsx(x,{sx:{display:"flex",flexGrow:1,px:{xs:2,md:6},pt:{xs:2,md:3}},maxWidth:1,children:t}),d=(t,s=[])=>{const{setNavigationContext:o}=e();r.useEffect(()=>{o(t)},s)};export{p as D,d as s};
