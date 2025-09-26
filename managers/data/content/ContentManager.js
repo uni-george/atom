@@ -8,6 +8,10 @@ const SnowflakeID = require("snowflake-id").default;
 const snowflake = new SnowflakeID();
 
 class ContentManager {
+    static namePattern = /^.{1,48}$/;
+
+    static stringContentPattern = /^(.|\n){0,8192}$/;
+
     /**
      * Get a Content from its ID.
      * @param {string} id The Content's ID.
@@ -206,5 +210,7 @@ class Content {
         delete this;
     }
 }
+
+ContentManager.ContentType = ContentType;
 
 module.exports = ContentManager;

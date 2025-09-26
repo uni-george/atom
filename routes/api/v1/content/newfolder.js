@@ -36,6 +36,12 @@ module.exports = {
                 .custom(val => ContentFolderManager.get(val))
                 .withMessage("Provided parent folder ID points to a non-existent folder.")
             ,
+            body("removeParent")
+                .optional()
+                .isBoolean()
+                .withMessage("Provided removeContent value was not a Boolean.")
+                .toBoolean()
+            ,
             (req, res, next) => {
                 let issues = validationResult(req);
                 if (!issues.isEmpty()) {

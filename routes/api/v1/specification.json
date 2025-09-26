@@ -317,6 +317,233 @@
                         "$ref": "#/components/responses/ResourceNotFoundError"
                     }
                 }
+            },
+            "patch": {
+                "summary": "Edit content.",
+                "description": "Edit a piece of content by its ID.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "$ref": "#/components/schemas/Snowflake"
+                        },
+                        "required": true,
+                        "description": "The content's ID."
+                    }
+                ],
+                "security": [
+                    {
+                        "Cookie": []
+                    }
+                ],
+                "tags": [
+                    "content"
+                ],
+                "requestBody": {
+                    "description": "An object containing content details to be used.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 48,
+                                        "minLength": 1
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "string",
+                                            "number"
+                                        ]
+                                    },
+                                    "parentID": {
+                                        "$ref": "#/components/schemas/Snowflake"
+                                    },
+                                    "data": {
+                                        "oneOf": [
+                                            {
+                                                "type": "string",
+                                                "maxLength": 8192,
+                                                "minLength": 0
+                                            },
+                                            {
+                                                "type": "number",
+                                                "maxLength": 8192
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The edited content.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Content"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/MalformedRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UserNotAuthenticatedError"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UserNotAuthorisedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ResourceNotFoundError"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete content.",
+                "description": "Delete a piece of content by its ID.",
+                "tags": [
+                    "content"
+                ],
+                "security": [
+                    {
+                        "Cookie": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "$ref": "#/components/schemas/Snowflake"
+                        },
+                        "required": true,
+                        "description": "The content's ID."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/ActionSuccessful"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/MalformedRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UserNotAuthenticatedError"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UserNotAuthorisedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ResourceNotFoundError"
+                    }
+                }
+            }
+        },
+        "/content/": {
+            "get": {
+                "summary": "Get content.",
+                "description": "Get content at the top level.",
+                "tags": [
+                    "content"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The requested content.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "folders": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ContentFolder"
+                                            }
+                                        },
+                                        "content": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Content"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create content.",
+                "description": "Create a new piece of content.",
+                "tags": [
+                    "content"
+                ],
+                "security": [
+                    {
+                        "Cookie": []
+                    }
+                ],
+                "requestBody": {
+                    "description": "An object containing content details to be used.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "example content name",
+                                        "maxLength": 48,
+                                        "minLength": 1
+                                    },
+                                    "parentID": {
+                                        "$ref": "#/components/schemas/Snowflake"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "string",
+                                            "number"
+                                        ],
+                                        "default": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The created content.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Content"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/MalformedRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UserNotAuthenticatedError"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UserNotAuthorisedError"
+                    }
+                }
             }
         },
         "/content/folder": {
@@ -325,6 +552,11 @@
                 "description": "Create a content folder with provided parameters.",
                 "tags": [
                     "content"
+                ],
+                "security": [
+                    {
+                        "Cookie": []
+                    }
                 ],
                 "requestBody": {
                     "description": "An object containing updated details.",
@@ -483,6 +715,46 @@
                                 }
                             }
                         }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/MalformedRequestError"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/UserNotAuthenticatedError"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UserNotAuthorisedError"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ResourceNotFoundError"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a folder.",
+                "description": "Delete a content folder by its ID.",
+                "tags": [
+                    "content"
+                ],
+                "security": [
+                    {
+                        "Cookie": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "$ref": "#/components/schemas/Snowflake"
+                        },
+                        "required": true,
+                        "description": "The folder's ID."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/ActionSuccessful"
                     },
                     "400": {
                         "$ref": "#/components/responses/MalformedRequestError"

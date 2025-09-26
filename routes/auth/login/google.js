@@ -13,7 +13,7 @@ module.exports = {
             isNotAuthenticated,
             (req, res, next) => {
                 // check enabled
-                if (!AuthManager.getEnabledLoginMethods().includes("local")) return next();
+                if (!AuthManager.getEnabledLoginMethods().includes("google")) return next();
 
                 const attemptType = "login";
                 const state = Buffer.from(JSON.stringify({ 

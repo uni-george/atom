@@ -2,11 +2,12 @@
 
 const { param, validationResult, query, body } = require("express-validator");
 const snowflakePattern = require("../../../../util/snowflakePattern");
-const { MalformedRequest, ResourceNotFound, UserUnauthorised } = require("../../../../util/standardResponses");
+const { MalformedRequest, ResourceNotFound, UserUnauthorised, ActionSuccessful } = require("../../../../util/standardResponses");
 const ContentFolderManager = require("../../../../managers/data/content/ContentFolderManager");
 const ContentManager = require("../../../../managers/data/content/ContentManager");
 const isAuthenticated = require("../../../../uses/isAuthenticated");
 const { checkUser, permissions } = require("../../../../managers/data/GlobalPermissionsManager");
+const defaultValidationResult = require("../../../../uses/defaultValidationResult");
 
 module.exports = {
     path: "/folder/:id",
@@ -77,6 +78,8 @@ module.exports = {
             param("id")
                 .notEmpty()
                 .withMessage("Provided ID was empty.")
+                .isString()
+                .withMessage("Provided ID was not a string.")
                 .matches(snowflakePattern)
                 .withMessage("Provided ID was not a Snowflake.")
             ,
@@ -97,14 +100,7 @@ module.exports = {
                 .withMessage("Provided parent folder ID points to a non-existent folder.")
                 .custom((val, { req }) => val ? !ContentFolderManager.get(req.params.id)?.getChildFolderIDs?.()?.includes?.(val) : true)
                 .withMessage("Provided parent folder ID points to a folder that is currently a child of the folder."),
-            (req, res, next) => {
-                let issues = validationResult(req);
-                if (!issues.isEmpty()) {
-                    return MalformedRequest(res, issues);
-                }
-
-                next();
-            },
+            defaultValidationResult,
             (req, res, next) => {
                 let toEdit = ContentFolderManager.get(req.params.id);
                 if (!toEdit) {
@@ -128,6 +124,33 @@ module.exports = {
                     parentID: toEdit.parent?.id,
                     path: toEdit.getPath() || []
                 });
+            }
+        ],
+        /** @type {import("express").Handler[]} */
+        delete: [
+            isAuthenticated,
+            (req, res, next) => {
+                if (checkUser(req.user.id, permissions.DeleteContentFolders)) next();
+                else UserUnauthorised(res);
+            },
+            param("id")
+                .notEmpty()
+                .withMessage("Provided ID was empty.")
+                .isString()
+                .withMessage("Provided ID was not a string.")
+                .matches(snowflakePattern)
+                .withMessage("Provided ID was not a Snowflake.")
+            ,
+            defaultValidationResult,
+            (req, res, next) => {
+                let toDelete = ContentFolderManager.get(req.params.id);
+                if (!toDelete) {
+                    return ResourceNotFound(res);
+                }
+
+                toDelete.delete();
+
+                return ActionSuccessful(res);
             }
         ]
     }

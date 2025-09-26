@@ -227,7 +227,7 @@ class ContentFolder {
                 )    
             `).run(this.id);
             // delete folder
-        }).run(this.id);
+        });
 
         delete this;
     }
